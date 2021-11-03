@@ -6,29 +6,45 @@ import datetime
 import time
 
 
-def fishing(w):
+def fishing(w, settings):
     fish = False
     now = time.time()
-    write_key(0x17) 
-    time.sleep(0.5) # Waiting for inventory to open
-    screenshot(1446,219,1817,683)
-    res = find_template('screen.png', 'Images/mk2.jpg', 0.8)
-    if len(res[0]) != 0:
-        res[0][0], res[1][0] = res[0][0] + 1449, res[1][0] + 228
+    write_key(0x17)
+    time.sleep(0.5)  # Waiting for inventory to open
+    screenshot()
+    x, y = find_template(
+        img_name='screen.png',
+        template_name=settings['path_templateMK2'],
+        threshold=0.9,
+        scale_factor=settings['scale_factor'],
+        scale_size=settings['scale_size'],
+        return_coords=True)
+    if x:
         w.write('[{}]Нашли удочку\n'.format(datetime.datetime.now()))
-        pag.moveTo(res[0][0], res[1][0])
+        pag.moveTo(x, y)
         pag.click(button='right')
         fish = True
         # Checking the need to press the LMB and the end of fishing
         while fish:
-            screenshot(1034,890,1084,942)
-            res = find_template('screen.png', 'Images/need_click.jpg', 0.9)
-            if len(res[0]) != 0:
+            screenshot()
+            res = find_template(
+                img_name='screen.png',
+                template_name=settings['path_templateNeedClick'],
+                threshold=0.9,
+                scale_factor=settings['scale_factor'],
+                scale_size=settings['scale_size'],
+                return_coords=False)
+            if res:
                 w.write('[{}]ЛКМ\n'.format(datetime.datetime.now()))
-                for i in range(13):
-                    pag.click()
-            screenshot(848,1002,1056,1110)
-            res = find_template('screen.png', 'Images/end_fishing.jpg', 0.8)
+                pag.click(button='left', clicks=15, interval=0.25)
+            screenshot()
+            res = find_template(
+                img_name='screen.png',
+                template_name=settings['path_templateEndFishing'],
+                threshold=0.9,
+                scale_factor=settings['scale_factor'],
+                scale_size=settings['scale_size'],
+                return_coords=False)
             later = time.time()
             if len(res[0]) != 0 and int(later - now) > 5:
                 w.write('[{}]Конец цикла\n'.format(datetime.datetime.now()))
